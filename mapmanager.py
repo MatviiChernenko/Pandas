@@ -9,6 +9,7 @@ class Mapmaneger():
         self.block = loader.loadModel(self.model)
         self.block.setTexture(loader.loadTexture(self.texture))
         self.block.setPos(position)
+        self.block.setTag("at", str(position))
         self.block.reparentTo(render)
 
     def load_land(self):
@@ -23,3 +24,21 @@ class Mapmaneger():
                         self.addBlock((x,y,z))
                     x += 1
                 y += 1
+
+    def find_block(self,pos):
+        return render.findAllMatches("=at=" + str(pos))
+    
+    def isEmpty(self,pos):
+        block = self.find_block(pos)
+        if block:
+            return False
+        else:
+            return True
+        
+    def findLand(self,pos):
+        x,y,z = pos
+        z = 1
+        while not self.isEmpty((x,y,z)):
+            z += 1
+        return (x,y,z)
+
