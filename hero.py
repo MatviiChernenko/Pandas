@@ -13,11 +13,15 @@ rotate_right = "arrow_right"
 up = "q"
 down = "e"
 
+create_block = "mouse1"
+remove_block = "mouse3"
+
 def degreeToRadian(angle):
     return angle *(pi / 180)
 
 class Hero():
-    def __init__(self):
+    def __init__(self,land):
+        self.land = land
         self.cameraOn = True
         self.mode = True
         self.pitch = 0
@@ -56,7 +60,7 @@ class Hero():
         else:
             self.cameraBind()
 
-    def lokAt(self,angle):
+    def lookAt(self,angle):
         x = round(self.hero.getX())
         y = round(self.hero.getY())
         z = round(self.hero.getZ())
@@ -85,18 +89,27 @@ class Hero():
         else:
             return(0,-1)
 
-    def tryMove(self,angle):
-        pass
+    def tryMove(self,x,y):
+        pos = round(x), round(y), round(self.hero.getZ())
+
+        if self.land.isEmpty(pos):
+            pos = self.land.findLand(pos)
+            return pos[2], True
+        else:
+            pos = pos[0], pos[1], pos[2] + 1
+            if self.land.isEmpty(pos):
+                return pos[2], True
+            return self.hero.getZ(), False
 
     def justMove(self,angle):
-        pos = self.lokAt(angle)
+        pos = self.lookAt(angle)
         self.hero.setPos(pos)
 
-    def moveTo(self,angle):
-        if self.mode:
-            self.tryMove(angle)
-        else:
-            self.justMove(angle)
+    #def moveTo(self,angle):
+    #    if self.mode:
+    #        self.tryMove(angle)
+    #    else:
+    #        self.justMove(angle)
 
     def chageMode(self):
         if self.mode:
@@ -158,16 +171,63 @@ class Hero():
             if self.move["left"]:
                 speedX += cos(degreeToRadian(self.hero.getH() - 0))
                 speedY += cos(degreeToRadian(self.hero.getH() - 90))
-            if self.move["forward"]:
+            if self.move["right"]:
                 speedX += cos(degreeToRadian(self.hero.getH() - 180))
                 speedY += cos(degreeToRadian(self.hero.getH() - 270))
+
+            if self.mode and True in list(self.move.values()):
+                posZ = self.tryMove(self.hero.getX() + (speedX * self.speed), self.hero.getY() + (speedY * self.speed))
+                if posZ[1]:
+                    self.hero.setZ(posZ[0])
+                else:
+                    speedX = 0
+                    speedY = 0
+            if not self.mode and True in list(self.move.values()):
+                speedX *= abs(cos(degreeToRadian(self.hero.getP())))
+                speedY *= abs(cos(degreeToRadian(self.hero.getP())))
+                if self.move["forward"]:
+                    speedZ = sin(degreeToRadian(self.hero.getP())) * -1
+                else:
+                    speedZ = sin(degreeToRadian(self.hero.getP()))
+            modul = ((speedX ** 2) + (speedY ** 2) + (speedZ ** 2)) ** 0.5
+            if modul == 0:
+                k = 1
+            else:
+                k = self.speed/modul
+
+            self.hero.setPos(self.hero.getPos() + (k * speedX, k * speedY, k * speedZ))
+
             
+    def modeBuild(self):
+        if self.mode:
+            self.land.place_block(self.lookAt(self.hero.getH() % 360))
+        else:
+            self.land.addBlock(self.lookAt(self.hero.getH() % 360))
+
+    def modeDestroy(self):
+        if self.mode:
+            self.land.remove_blocks(self.lookAt(self.hero.getH() % 360))
+        else:
+            self.land.remove_block(self.lookAt(self.hero.getH() % 360))
+
 
 
 
     def accept_events(self):
         base.accept(camera,self.camera_change)
         base.accept(mode,self.chageMode)
+        base.accept(create_block,self.modeBuild)
+        base.accept(remove_block,self.modeDestroy)
+
+
+        base.accept(forward,self.update_key,["forward", True])
+        base.accept(forward + "-up",self.update_key,["forward", False])
+        base.accept(backward,self.update_key,["backward", True])
+        base.accept(backward + "-up",self.update_key,["backward", False])
+        base.accept(left,self.update_key,["left", True])
+        base.accept(left + "-up",self.update_key,["left", False])
+        base.accept(right,self.update_key,["right", True])
+        base.accept(right + "-up",self.update_key,["right", False])
 
         #base.accept(rotate_left,self.rotateLeft)
         #base.accept(rotate_left + "-repeat",self.rotateLeft)

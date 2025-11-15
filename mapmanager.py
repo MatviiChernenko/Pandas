@@ -41,4 +41,18 @@ class Mapmaneger():
         while not self.isEmpty((x,y,z)):
             z += 1
         return (x,y,z)
+    
+    def place_block(self,pos):
+        if self.isEmpty(pos):
+            self.addBlock(self.findLand(pos))
 
+    def remove_block(self,pos):
+        blocks = self.find_block(pos)
+        for block in blocks:
+            block.removeNode()
+    
+    def remove_blocks(self,pos):
+        x,y,z = self.findLand(pos)
+        pos = x,y, z - 1
+        for block in self.find_block(pos):
+            block.removeNode()

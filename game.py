@@ -9,7 +9,7 @@ class Game(ShowBase):
         ShowBase.__init__(self)
         self.maps = Mapmaneger()
         self.maps.load_land()
-        self.hero = Hero()
+        self.hero = Hero(self.maps)
         self.task_mgr.add(self.update,"update")
         props = WindowProperties()
         props.setCursorHidden(True)
