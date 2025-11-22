@@ -16,6 +16,10 @@ down = "e"
 create_block = "mouse1"
 remove_block = "mouse3"
 
+save_map = "control-s"
+load_map = "control-o"
+
+
 def degreeToRadian(angle):
     return angle *(pi / 180)
 
@@ -218,6 +222,10 @@ class Hero():
         base.accept(mode,self.chageMode)
         base.accept(create_block,self.modeBuild)
         base.accept(remove_block,self.modeDestroy)
+        base.accept(load_map,self.land.load_map)
+        base.accept(save_map,self.land.save_map)
+
+
 
 
         base.accept(forward,self.update_key,["forward", True])

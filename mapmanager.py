@@ -1,8 +1,9 @@
 # напиши тут код створення та управління карткою
+import pickle
 class Mapmaneger():
     def __init__(self):
         self.model = "block.egg"
-        self.texture = "block.png"
+        self.texture = "grow.png"
         self.file = "land2.txt"
 
     def addBlock(self,position):
@@ -56,3 +57,20 @@ class Mapmaneger():
         pos = x,y, z - 1
         for block in self.find_block(pos):
             block.removeNode()
+
+    def save_map(self):
+        blocks = render.getChildren()
+        with open("my_map.dat","wb") as file:
+            pickle.dump(len(blocks),file)
+            for block in blocks:
+                x,y,z = block.getPos()
+                pos = int(x), int(y), int(z)
+                pickle.dump(pos,file)
+
+    def load_map(self):
+        render.detachNode()
+        with open("my_map.dat","rb") as file:
+            lenght = pickle.load(file)
+            for i in range(lenght):
+                pos = pickle.load(file)
+                self.addBlock(pos)
